@@ -1,5 +1,5 @@
-import { Direction } from "./Movement"
-import { State } from "./index"
+import { Direction } from "./Keyboard"
+import { config, State } from "./index"
 
 const opposites = new Map([
   [Direction.UP, Direction.DOWN],
@@ -22,16 +22,37 @@ function changeDirection(state: State, direction: Direction): State {
 
 function move(state: State): State {
   const [x, y] = state.snakeHead
+  const increment = wrappingIncrement(config.boardSize)
+  const decrement = wrappingDecrement(config.boardSize)
+
   switch (state.direction) {
     // remember y = 0 is top of screen
     case Direction.UP:
-      return { ...state, snakeHead: [x, y - 1] }
+      return { ...state, snakeHead: [x, decrement(y)] }
     case Direction.DOWN:
-      return { ...state, snakeHead: [x, y + 1] }
+      return { ...state, snakeHead: [x, increment(y)] }
     case Direction.LEFT:
-      return { ...state, snakeHead: [x - 1, y] }
+      return { ...state, snakeHead: [decrement(x), y] }
     case Direction.RIGHT:
-      return { ...state, snakeHead: [x + 1, y] }
+      return { ...state, snakeHead: [increment(x), y] }
+  }
+}
+
+const wrappingIncrement = (max: number) => {
+  return (value: number) => {
+    if (value === max) {
+      return 0
+    }
+    return value + 1
+  }
+}
+
+const wrappingDecrement = (max: number) => {
+  return (value: number) => {
+    if (value === 0) {
+      return max
+    }
+    return value - 1
   }
 }
 

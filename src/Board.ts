@@ -1,11 +1,11 @@
-import { config, State } from "./index"
+import { State } from "./index"
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement
 const context = canvas.getContext("2d")
 const squareSize = 10
 
 function drawSquare(color: string) {
-  return function (x: number, y: number) {
+  return function ([x, y]: [number, number]) {
     if (context == null) {
       throw Error("Wtf, context wasn't available")
     }
@@ -17,17 +17,12 @@ function drawSquare(color: string) {
 const drawEmptySquare = drawSquare("#FFFFFF")
 const drawSnakeSquare = drawSquare("#000000")
 
-function renderEmptyBoard(boardSize: number) {
-  for (let x = 0; x < boardSize; x++) {
-    for (let y = 0; y > boardSize; y++) {
-      drawEmptySquare(x, y)
-    }
-  }
+export function renderSnake(...states: State[]) {
+  states.forEach(it => {
+    drawSnakeSquare(it.snakeHead)
+  })
 }
 
-export function render(state: State) {
-  renderEmptyBoard(config.boardSize)
-  const [x, y] = state.snakeHead
-  drawSnakeSquare(x, y)
+export function renderEmpty(state: State) {
+  drawEmptySquare(state.snakeHead)
 }
-

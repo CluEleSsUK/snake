@@ -1,11 +1,11 @@
-import { render } from "./Board"
-import { Direction, startKeyboardMonitor } from "./Movement"
-import { changeDirection, move } from "./Actions"
+import { Direction, startKeyboardMonitor } from "./Keyboard"
+import { changeDirection } from "./Actions"
 import { createStore } from "./Store"
+import { startSnake } from "./RenderLoop"
 
 export const config = {
   boardSize: 500,
-  rendersPerSecond: 50
+  rendersPerSecond: 250
 }
 
 export interface State {
@@ -23,16 +23,7 @@ export const initialState: State = {
   direction: Direction.RIGHT,
 }
 
-const store = createStore(initialState)
-render(initialState)
-
-function startSnake(state: State) {
-  render(state)
-  setTimeout(() => {
-    startSnake(store.dispatch(move))
-  }, 1000 / config.rendersPerSecond)
-}
-
-startSnake(initialState)
+export const store = createStore(initialState)
+startSnake(store.getState())
 startKeyboardMonitor(direction => store.dispatch(state => changeDirection(state, direction)))
 

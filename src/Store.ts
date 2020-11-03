@@ -1,13 +1,18 @@
 function createStore<T>(initialState: T) {
-  let state = initialState
+  const states = [initialState]
+  const getState = () => states[states.length - 1] || initialState
+  const getLast = (howMany: number) => states.slice(states.length - howMany, states.length)
 
   return {
-    getState: () => state,
+    getState,
+    getLast,
     dispatch: (fn: (s: T) => T): T => {
-      state = fn(state)
-      return state
+      const nextState = fn(getState())
+      states.push(nextState)
+      return nextState
     }
   }
 }
+
 
 export { createStore }
