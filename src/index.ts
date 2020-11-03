@@ -5,7 +5,7 @@ import { startSnake } from "./RenderLoop"
 
 export const config = {
   boardSize: 500,
-  rendersPerSecond: 250
+  rendersPerSecond: 5
 }
 
 export interface State {
@@ -18,7 +18,7 @@ export interface State {
 const boardMidPoint = Math.floor(config.boardSize / 2)
 export const initialState: State = {
   gameLost: false,
-  snakeLength: 1,
+  snakeLength: 5,
   snakeHead: [boardMidPoint, boardMidPoint],
   direction: Direction.RIGHT,
 }

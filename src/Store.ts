@@ -1,6 +1,8 @@
 function createStore<T>(initialState: T) {
   const states = [initialState]
-  const getState = () => states[states.length - 1] || initialState
+  const getState = () => {
+    return states[states.length - 1] || initialState
+  }
   const getLast = (howMany: number) => states.slice(states.length - howMany, states.length)
 
   return {
@@ -13,6 +15,5 @@ function createStore<T>(initialState: T) {
     }
   }
 }
-
 
 export { createStore }
