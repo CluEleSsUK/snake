@@ -1,32 +1,26 @@
-import { renderEmpty, renderSnake } from "./Board"
-import { move } from "./Actions"
-import { config, State, store } from "./index"
+import { renderEmpty, renderFood, renderSnake } from "./Board"
+import { moveSnake } from "./Actions"
+import { config, initialState, State, store } from "./index"
 
 function startSnake(state: State) {
-  // get one more than snake length so we can erase the last previous snake tail
-  const states = store.getLast(state.snakeLength + 1)
+  const nextState = store.dispatch(moveSnake)
 
-  // because turning does not change the snake head position, we must ignore
-  // these events when erasing the snake
-  const turns = numberOfTurns(states)
-  const [oldTailEnd, ...theSnake] = store.getLast(state.snakeLength + 1 + turns)
+  if (nextState.gameOver) {
+    alert("Game over! Dismiss to restart.")
+    startSnake(initialState)
+    return
+  }
 
-  renderEmpty(oldTailEnd)
-  renderSnake(...theSnake)
+  state.snake
+    .filter(it => !nextState.snake.includes(it))
+    .forEach(renderEmpty)
+
+  renderSnake(nextState)
+  renderFood(nextState)
 
   setTimeout(() => {
-    startSnake(store.dispatch(move))
+    startSnake(nextState)
   }, 1000 / config.rendersPerSecond)
-}
-
-function numberOfTurns(states: State[]): number {
-  let turns = 0
-  for (let i = 0; i < states.length - 1; i++) {
-    if (states[i].direction != states[i + 1].direction) {
-      turns++
-    }
-  }
-  return turns
 }
 
 export { startSnake }

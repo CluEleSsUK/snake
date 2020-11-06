@@ -1,5 +1,6 @@
+import { config, Pixel, State } from "./index"
 import { Direction } from "./Keyboard"
-import { config, State } from "./index"
+import { randomPixel, samePixel } from "./Board"
 
 const opposites = new Map([
   [Direction.UP, Direction.DOWN],
@@ -10,7 +11,7 @@ const opposites = new Map([
 
 function changeDirection(state: State, direction: Direction): State {
   /// cannot move 180 degrees in snake!!
-  if (direction === opposites.get(state.direction)) {
+  if (direction === state.direction || direction === opposites.get(state.direction)) {
     return state
   }
 
@@ -20,21 +21,70 @@ function changeDirection(state: State, direction: Direction): State {
   }
 }
 
-function move(state: State): State {
-  const [x, y] = state.snakeHead
+function moveSnake(state: State): State {
+  const next = nextSquare(state.direction, state.snake[state.snake.length - 1])
+
+  if (isSnakePixel(state, next)) {
+    return gameOver(state)
+  }
+
+  if (isFoodPixel(state, next)) {
+    return respawnFood(growSnake(state, next))
+  }
+
+  return moveSnakeTo(state, next)
+}
+
+function isSnakePixel(state: State, pixel: Pixel): boolean {
+  return state.snake.some(it => samePixel(it, pixel))
+}
+
+function isFoodPixel(state: State, pixel: Pixel): boolean {
+  return samePixel(state.foodPosition, pixel)
+}
+
+function gameOver(state: State): State {
+  return {
+    ...state,
+    gameOver: true
+  }
+}
+
+function respawnFood(state: State): State {
+  return {
+    ...state,
+    foodPosition: randomPixel()
+  }
+}
+
+function growSnake(state: State, next: Pixel) {
+  return {
+    ...state,
+    snake: [...state.snake, next]
+  }
+}
+
+function moveSnakeTo(state: State, next: Pixel): State {
+  return {
+    ...state,
+    snake: [...state.snake.slice(1, state.snake.length), next],
+  }
+}
+
+function nextSquare(direction: Direction, [x, y]: [number, number]): [number, number] {
   const increment = wrappingIncrement(config.boardSize)
   const decrement = wrappingDecrement(config.boardSize)
 
-  switch (state.direction) {
+  switch (direction) {
     // remember y = 0 is top of screen
     case Direction.UP:
-      return { ...state, snakeHead: [x, decrement(y)] }
+      return [x, decrement(y)]
     case Direction.DOWN:
-      return { ...state, snakeHead: [x, increment(y)] }
+      return [x, increment(y)]
     case Direction.LEFT:
-      return { ...state, snakeHead: [decrement(x), y] }
+      return [decrement(x), y]
     case Direction.RIGHT:
-      return { ...state, snakeHead: [increment(x), y] }
+      return [increment(x), y]
   }
 }
 
@@ -43,7 +93,7 @@ const wrappingIncrement = (max: number) => {
     if (value === max) {
       return 0
     }
-    return value + 1
+    return value + config.pixelSize
   }
 }
 
@@ -52,8 +102,8 @@ const wrappingDecrement = (max: number) => {
     if (value === 0) {
       return max
     }
-    return value - 1
+    return value - config.pixelSize
   }
 }
 
-export { changeDirection, move }
+export { changeDirection, moveSnake }
